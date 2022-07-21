@@ -47,6 +47,9 @@ app.layout = html.Div([
                 )
             }
         )
+    ], style = {'width':'20%','height':'50%','display':'inline-block'}),
+    html.Div([
+        dcc.Markdown(id = 'mpg_stats')
     ], style = {'width':'20%','height':'50%','display':'inline-block'})
 ])
 
@@ -63,7 +66,8 @@ def callback_graph(hoverData):
                 x = [0,1],
                 #setting y value to the acceleration rate of the car
                 y = [0,60/df.iloc[v_index]['acceleration']],
-                mode = 'lines'
+                mode = 'lines',
+                line = {'width':2*df.iloc[v_index]['cylinders']}
             )
         ],
         'layout':go.Layout(
@@ -75,6 +79,23 @@ def callback_graph(hoverData):
             height=300)
     }
     return figure
+
+@app.callback(
+    Output('mpg_stats','children'),
+    [Input('mpg-scatter','hoverData')]
+)
+def callback_stats(hoverData):
+    v_index = hoverData['points'][0]['pointIndex']
+    stats = """
+        {} cylinders
+        {}cc displacement
+        0 to 60 in {} seconds
+    """.format(
+        df.iloc[v_index]['cylinders'],
+        df.iloc[v_index]['displacement'],
+        df.iloc[v_index]['acceleration']
+    )
+    return stats 
 
 if __name__ == '__main__':
     app.run_server()
